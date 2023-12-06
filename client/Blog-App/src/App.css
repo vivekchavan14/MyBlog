@@ -1,0 +1,67 @@
+body {
+  color: #222;
+}
+
+main {
+  padding: 10px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 50px;
+  align-items: center;
+}
+
+header a{
+  text-decoration: none;
+  color: inherit;
+}
+
+header a.Logo{
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+header nav{
+  display: flex;
+  gap: 15px;
+  font-size: 1.1rem;
+}
+
+
+img {
+  max-width: 100%;
+}
+
+div.post{
+   display: grid;
+   grid-template-columns: 0.8fr 1.2fr;
+   gap : 20px
+}
+
+div.post img{
+  width: 50%;
+  height: 50%;
+  margin: 0;
+  padding: 20px;
+}
+
+div.postList div.post {
+  gap : 20px;
+}
+
+div.post div.text h2{
+  margin: 0;
+  font-size: 1rem;
+}
+
+div.post p.info{
+  margin: 6px 0;
+  color: #888;
+  font-size: 0.7rem;
+  font-weight: bold;
+
+}
