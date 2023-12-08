@@ -1,44 +1,67 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { UserContext } from './userContext';
 
 function Header() {
-  const [username, setUsername] = useState(null);
+
   const [error, setError] = useState(null);
+  const {setUserInfo} = useContext(UserContext)
 
   useEffect(() => {
     fetch('http://localhost:5000/profile', {
-      method: 'GET', // Specify the HTTP method
+      method: 'GET',
       credentials: 'include',
     })
       .then(response => {
         if (response.ok) {
-          return response.json();
+          return response.json().then(userInfo => {
+            setUserInfo(userInfo)
+          })
         }
         throw new Error('Failed to fetch user info');
       })
-      .then(userInfo => {
-        setUsername(userInfo.username);
-      })
+      
       .catch(error => {
         console.error('Error fetching user info:', error);
-        setError('Failed to fetch user info'); // Set the error state
+        
+        setError('Failed to fetch user info');
       });
-  }, []); 
+  }, []);
+
+  function logout() {
+    fetch('http://localhost:5000/logout', {
+      method: 'POST',
+      credentials: 'include',
+    })
+      .then(response => {
+        if (response.ok) {
+          setUserInfo(null); // Clear the username on successful logout
+        } else {
+          throw new Error('Failed to logout');
+        }
+      })
+      .catch(error => {
+        console.error('Error logging out:', error);
+        setError('Failed to logout');
+      });
+  }
 
   return (
     <div>
       <header>
-        <Link to='/' className='Logo'>MyBlog</Link>
+        <Link to='/' className='Logo'>
+          MyBlog
+        </Link>
         <nav>
-          {error || !username ? ( // If there's an error or no username, show login and register
+          {error || !username ? (
             <>
               <Link to='/login'>Login</Link>
               <Link to='/register'>Register</Link>
             </>
           ) : (
-            <> {/* If username exists, show Add Post and Logout */}
-              <Link to="/create">Add Post</Link>
-              <Link to="/logout">Logout</Link>
+            <>
+              <Link to='/create'>Add Post</Link>
+              <button onClick={logout}>Logout</button>
             </>
           )}
         </nav>

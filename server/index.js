@@ -9,16 +9,15 @@ const SECRET_KEY = "secret_key_is_secret";
 const cookieParser = require('cookie-parser');
 
 mongoose.connect('mongodb+srv://abc:abc@cluster0.josgkqr.mongodb.net/?retryWrites=true&w=majority');
+
 const corsOptions = {
-    origin: 'http://localhost:5173', // Replace this with your actual frontend origin
+    origin: 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-  };
-  
-  app.use(cors(corsOptions));
-  
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -48,7 +47,7 @@ app.post('/login', async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid password' });
         }
-        
+
         const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '1h' });
 
         res.cookie('authToken', token, { maxAge: 3600000, httpOnly: true }); // Set token as a cookie
@@ -61,7 +60,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/profile', (req, res) => {
-    const { authToken } = req.cookies; // Assuming the token is stored as 'authToken'
+    const authToken = req.cookies.authToken; // Access the authToken directly
 
     if (!authToken) {
         return res.status(401).json({ message: 'Unauthorized - No token provided' });
@@ -76,6 +75,9 @@ app.get('/profile', (req, res) => {
     });
 });
 
+app.post('/logout', (req, res) => {
+    res.clearCookie('authToken').json('ok'); // Clear the authToken cookie
+});
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

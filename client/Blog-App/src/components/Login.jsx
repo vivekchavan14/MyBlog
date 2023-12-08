@@ -12,6 +12,7 @@ function Login() {
       method: 'POST',
       body: JSON.stringify({ username, password }),
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
     })
       .then(response => {
         if (response.ok) {
