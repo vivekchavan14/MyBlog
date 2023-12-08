@@ -7,8 +7,11 @@ const userModel = require('./models/user');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = "secret_key_is_secret";
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
+const upload = require('multer')({ dest: 'uploads/' });
+const fs = require('fs');
 
-mongoose.connect('mongodb+srv://abc:abc@cluster0.josgkqr.mongodb.net/?retryWrites=true&w=majority');
+mongoose.connect('mongodb+srv://xyz:xyz@cluster0.wucrnfu.mongodb.net/?retryWrites=true&w=majority');
 
 const corsOptions = {
     origin: 'http://localhost:5173',
@@ -77,6 +80,37 @@ app.get('/profile', (req, res) => {
 
 app.post('/logout', (req, res) => {
     res.clearCookie('authToken').json('ok'); // Clear the authToken cookie
+});
+
+
+
+app.post('/post', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const { originalname, path } = req.file;
+        const parts = originalname.split('.');
+        const ext = parts[parts.length - 1];
+        const newPath = path + '.' + ext;
+
+        fs.renameSync(path, newPath);
+
+        const { title, summary, content } = req.body;
+
+        const postDoc = await Post.create({
+            title,
+            summary,
+            content,
+            cover: newPath,
+        });
+
+        res.json(postDoc);
+    } catch (error) {
+        console.error('Error creating post:', error);
+        res.status(500).json({ message: 'Error creating post' });
+    }
 });
 
 app.listen(port, () => {
