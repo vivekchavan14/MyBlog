@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import { UserContext } from './userContext';
 
 function Header() {
-
   const [error, setError] = useState(null);
-  const {setUserInfo} = useContext(UserContext)
+  const { userInfo, setUserInfo } = useContext(UserContext); 
 
   useEffect(() => {
     fetch('http://localhost:5000/profile', {
@@ -14,19 +13,18 @@ function Header() {
     })
       .then(response => {
         if (response.ok) {
-          return response.json().then(userInfo => {
-            setUserInfo(userInfo)
-          })
+          return response.json();
         }
         throw new Error('Failed to fetch user info');
       })
-      
+      .then(userInfo => {
+        setUserInfo(userInfo); 
+      })
       .catch(error => {
         console.error('Error fetching user info:', error);
-        
         setError('Failed to fetch user info');
       });
-  }, []);
+  }, [setUserInfo]);
 
   function logout() {
     fetch('http://localhost:5000/logout', {
@@ -35,7 +33,7 @@ function Header() {
     })
       .then(response => {
         if (response.ok) {
-          setUserInfo(null); // Clear the username on successful logout
+          setUserInfo(null); 
         } else {
           throw new Error('Failed to logout');
         }
@@ -53,7 +51,7 @@ function Header() {
           MyBlog
         </Link>
         <nav>
-          {error || !username ? (
+          {error || !userInfo ? (
             <>
               <Link to='/login'>Login</Link>
               <Link to='/register'>Register</Link>
