@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const upload = require('multer')({ dest: 'uploads/' });
 const fs = require('fs');
+const Post = require('./models/post.js')
 
 mongoose.connect('mongodb+srv://xyz:xyz@cluster0.wucrnfu.mongodb.net/?retryWrites=true&w=majority');
 
@@ -63,7 +64,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/profile', (req, res) => {
-    const authToken = req.cookies.authToken; // Access the authToken directly
+    const authToken = req.cookies.authToken; 
 
     if (!authToken) {
         return res.status(401).json({ message: 'Unauthorized - No token provided' });
@@ -94,24 +95,40 @@ app.post('/post', upload.single('file'), async (req, res) => {
         const parts = originalname.split('.');
         const ext = parts[parts.length - 1];
         const newPath = path + '.' + ext;
-
         fs.renameSync(path, newPath);
 
-        const { title, summary, content } = req.body;
+        const token = req.cookies.token; 
+       
 
-        const postDoc = await Post.create({
-            title,
-            summary,
-            content,
-            cover: newPath,
+        jwt.verify(token, secret, {}, async (err, decoded) => {
+            if (err) throw err;
+
+            const { title, summary, content } = req.body;
+
+            const postDoc = await Post.create({
+                title,
+                summary,
+                content,
+                cover: newPath,
+                author: decoded.id
+            });
+
+            res.json(postDoc);
         });
-
-        res.json(postDoc);
     } catch (error) {
         console.error('Error creating post:', error);
         res.status(500).json({ message: 'Error creating post' });
     }
 });
+app.get('/post', async (req, res) => {
+    try {
+      const posts = await Post.find().populate('author', ['username']); 
+      res.json(posts);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+  
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
